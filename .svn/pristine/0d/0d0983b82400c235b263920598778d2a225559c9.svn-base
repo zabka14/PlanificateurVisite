@@ -1,0 +1,130 @@
+package Modele;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+/**
+ * 
+ * @author Groupe L
+ * This class regroup methods used to handle Chemin Object. Thoose object are data relative to a path betwen two Monument Files 
+ */
+public class Chemin {
+	
+	private Monument monumentDep; // getter et setter fait
+	private Monument monumentArr; // getter et setter fait
+	private ArrayList<String> chemin_a_prendre; // getter et setter fait
+	
+	public Chemin(Monument dep, Monument arr){
+		monumentDep = dep;
+		monumentArr = arr;
+		chemin_a_prendre = new ArrayList<>();
+	}
+	
+	public Chemin() {
+		
+	}
+
+	public Monument getMonumentDep() {
+		return monumentDep;
+	}
+	
+	public ArrayList<String> getChemin_a_prendre(){
+		return this.chemin_a_prendre;
+	}
+
+	
+	public void setMonumentDep(Monument monumentDep) {
+		this.monumentDep = monumentDep;
+	}
+
+	public Monument getMonumentArr() {
+		return monumentArr;
+	}
+
+	public void setMonumentArr(Monument monumentArr) {
+		this.monumentArr = monumentArr;
+	}
+	
+	/**
+	 * This method sets the chemin_a_prendre attribute based on a json file (stored on /data/chemin/)
+	 * @param path Path of the Json file. 
+	 */
+	public void remplirChemin(String path) {
+		
+		chemin_a_prendre = new ArrayList<>();
+ 		 
+		 JSONParser parser = new JSONParser();
+		    Object obj;
+			try {
+				obj = parser.parse(new FileReader(path));
+			    JSONArray jsonObject =  (JSONArray) obj;
+			    // Get de l'array instructions 
+			    JSONObject obj1 =  (JSONObject) jsonObject.get(2);
+			    JSONArray instru =  (JSONArray) obj1.get("Instructions");
+			    int size = instru.size();
+			    for (int foo =0; foo < size; foo++)
+			    {
+			    	String inst = (String) instru.get(foo);
+			    	chemin_a_prendre.add(inst);
+			    }
+
+			} catch (IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+	}
+	
+	/**
+	 * @return The Chemin (way) for a given Chemin Object on a String format
+	 */
+	public String getChemin() {
+		String str="";
+		for(int i=0;i<chemin_a_prendre.size();i++) {
+			str = str+chemin_a_prendre.get(i);
+		}
+		return str;
+	}
+	
+
+		public String toString() {
+			return "Chemin [monumentDep=" +monumentDep +  "monumentArr=" + monumentArr + ", chemin_a_prendre="+"]";
+		}
+		
+	 /**
+	  * 
+	  * @param path The path to a JSON Object relative to a Chemin object
+	  * @throws JSONException
+	  * @throws FileNotFoundException
+	  * @throws IOException
+	  * @throws ParseException
+	  */
+	 public void affecterDistanceEtTemps(String path) throws JSONException, FileNotFoundException, IOException, ParseException {
+		 
+		
+		    JSONParser parser = new JSONParser();
+		    Object obj;
+			try {
+				obj = parser.parse(new FileReader(path));
+			    JSONArray jsonObject =  (JSONArray) obj;
+			    // Get du temps
+			    JSONObject obj1 =  (JSONObject) jsonObject.get(0);
+			    obj1.get("Temps");
+			    obj1.get("Distance");
+			} catch (IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		 
+	 }
+
+
+
+}

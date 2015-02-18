@@ -1,0 +1,98 @@
+package Modele;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import org.jgrapht.alg.HamiltonianCycle;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
+import org.json.JSONException;
+
+import APIJson.APIMatrixJson;
+
+public class Parcours {
+
+	private String nom;
+	private ArrayList<Chemin> chemin_a_prendre;
+	private ArrayList<Monument> chemin_monument;
+	
+	public Parcours(String name){
+		this.nom = name;
+	}
+		
+	public String getNom() {
+		return nom;
+	}
+	
+	public void setNom(String nom) {
+		this.nom = nom;
+	}
+
+	public ArrayList<Chemin> getChemin_a_prendre() {
+		return chemin_a_prendre;
+	}
+	public ArrayList<Monument> getChemin_monument() {
+		return chemin_monument;
+	}
+	
+	public void setChemin_a_prendre(ArrayList<Chemin> chemin_a_prendre) {
+		this.chemin_a_prendre = chemin_a_prendre;
+	}
+	
+	public void setChemin_monumen(ArrayList<Monument> chemin_monument) {
+		this.chemin_monument = chemin_monument;
+	}
+
+	
+	public void creationChemin(ArrayList<Monument> listeMonument) throws IOException, JSONException{
+		//creation d'un chemin à partir d'une liste de monument
+		SimpleWeightedGraph<Monument, DefaultWeightedEdge>  graph = this.creationGraph(listeMonument);
+		this.chemin_a_prendre = plusCoursCycle(graph);
+	}
+	
+	//crée un graph orienté qui a pour sommet des monuments à partir d'une liste de monument
+	public SimpleWeightedGraph<Monument, DefaultWeightedEdge> creationGraph(ArrayList<Monument> monuments) throws IOException, JSONException{
+		SimpleWeightedGraph<Monument, DefaultWeightedEdge> g = new SimpleWeightedGraph<Monument,DefaultWeightedEdge>(DefaultWeightedEdge.class);
+
+		for (Monument monument : monuments) {
+			g.addVertex(monument);
+		}
+		
+		//récupere une matrice permettant d'avoir le temps entre chaque monument
+		HashMap<Monument, HashMap<Monument,Integer>> mapTemps = APIMatrixJson.getDistanceMap(monuments);
+		int temps;
+		//pour chaque sommet il faut sa distance avec les autres sommets
+		for (Monument sommet : g.vertexSet()) {
+			for (Monument autre_sommet : g.vertexSet()) {	
+				//creation de l'arc entre les deux sommets
+				if (!sommet.equals(autre_sommet)){
+					g.addEdge(sommet, autre_sommet);
+					temps = mapTemps.get(sommet).get(autre_sommet);
+					g.setEdgeWeight(g.getEdge(sommet, autre_sommet), temps);
+				}
+			}
+			
+		}		
+		return g;
+	}
+	
+	//création du plus cours cycle qui parcours tous les monument, retourne une liste de ces chemin
+	public ArrayList<Chemin> plusCoursCycle(SimpleWeightedGraph<Monument, DefaultWeightedEdge> g){
+		
+		List<Monument> monuments =  HamiltonianCycle.getApproximateOptimalForCompleteGraph(g);
+		this.chemin_monument = new ArrayList<Monument>(monuments);
+
+		ArrayList<Chemin> listeChemin = new ArrayList<Chemin>();
+		
+		for (int i = 0 ; i < monuments.size() - 1 ; i++){
+			Monument monumentD = monuments.get(i); //monument de depart du chemin
+			Monument monumentA = monuments.get(i+1); //monument d'arrive du chemin
+			Chemin chemin = new Chemin(monumentD,monumentA);
+		
+			listeChemin.add(chemin);
+		}
+		return listeChemin;
+	}	
+	
+}

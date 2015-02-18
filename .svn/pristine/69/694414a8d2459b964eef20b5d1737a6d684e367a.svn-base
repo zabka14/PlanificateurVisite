@@ -1,0 +1,42 @@
+package Controleur;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+import Modele.Monument;
+import Vue.Fenetre;
+
+/**
+ * Controleur qui permet de remplir les combobox avec la bonne catégorie
+ * @author Groupe L
+ *
+ */
+public class ControleurCategorieContrainte implements ActionListener {
+
+	private Fenetre fen;
+	
+	public ControleurCategorieContrainte(Fenetre f) {
+		fen = f;
+	}
+	
+	public void actionPerformed(ActionEvent arg0) {
+		String categorieSelect = fen.getTypeCategorie2();
+		ArrayList<Monument> monuments;
+		try {
+			monuments = fen.monumentParCategorie().get(categorieSelect);
+			//si la catÃ©gorie a des monuments
+			if (monuments != null){
+				fen.supprimeEtAjoute(monuments);
+			}
+		} catch (JsonIOException | JsonSyntaxException | IOException e1) {
+			e1.printStackTrace();
+		}
+		fen.remplirComboBoxContrainte(categorieSelect);
+		ControleurMonumentSelected.checkColor(fen);
+	}
+}

@@ -1,0 +1,73 @@
+package Controleur;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+import Modele.Monument;
+import Vue.CheckBox;
+import Vue.Fenetre;
+
+
+/**
+ * Controleur qui permet de passer sur l'onglet parcours lors de la cr�ation d'un parcours
+ * @author Groupe L
+ *
+ */
+public class ControleurOnglet implements ChangeListener{
+	
+	Fenetre fen;
+	
+	public ControleurOnglet(Fenetre f){
+		this.fen = f;
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		JTabbedPane tab = (JTabbedPane) e.getSource();
+		int index = tab.getSelectedIndex();
+		//si l'index est à 1 (onglet choix monument)
+		if (index == 1){
+			fen.removeLine();
+			String categorieSelect = fen.getTypeCategorie();
+			ArrayList<Monument> monuments;
+			try {
+				monuments = fen.monumentParCategorie().get(categorieSelect);
+				//si la catégorie a des monuments
+				if (monuments != null){
+					fen.supprimeEtAjoute(monuments);
+				}
+			} catch (JsonIOException | JsonSyntaxException | IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		else if (index == 0){ // onglet parcours
+			fen.removeLine();
+			fen.removeMarkers();
+		}
+		else if (index == 2) { // onglet contrainte
+			fen.removeLine();
+			String categorieSelect = fen.getTypeCategorie2();
+			ArrayList<Monument> monuments;
+			try {
+				monuments = fen.monumentParCategorie().get(categorieSelect);
+				//si la catégorie a des monuments
+				if (monuments != null){
+					fen.supprimeEtAjoute(monuments);
+				}
+			} catch (JsonIOException | JsonSyntaxException | IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		/* Couleur */
+		ControleurMonumentSelected.checkColor(fen);
+	}
+
+}
